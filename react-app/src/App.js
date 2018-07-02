@@ -1,26 +1,39 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import propTypes from 'prop-types';
 
 //Class compontent
 class App extends React.Component {
-  render(){
+  constructor() {
+    super();
+    this.state = {items: []}
+  }
+  componentWillMount() {
+    fetch('https://swapi.co/api/people/?format=json')
+      .then( response => response.json())
+      .then( ({results: items}) => this.setState({items}))
+  }
+  filter(e) {
+    this.setState({filter: e.target.value})
+  }
+  render() {
+    let items = this.state.items
+    if(this.state.filter){
+      items = items.filter( item =>
+        item.name.toLowerCase()
+        .includes(this.state.filter.toLowerCase()))
+    }
     return (
-      <Title text="The "/>
+      <div>
+        <input type="text" onChange={this.filter.bind(this)}/>
+        {items.map(item => 
+          // <h4 key={item.name}>{item.name}</h4>)}
+          <Person key={item.name} person={item} />)}
+      </div>
     );
   }
 }
 
-const Title = (props) => <h1>Title: {props.text}</h1>
-
-Title.propTypes = {
-  text(props, propName, component){
-    if(!(propName in props)){
-      return new Error('missing ${propName}')
-    }
-    if(props[propName].length < 6){
-      return new Error('${propName} was too short')
-    }
-  }
-}
+const Person = (props) => <h4>{props.person.name}</h4>
 
 export default App
